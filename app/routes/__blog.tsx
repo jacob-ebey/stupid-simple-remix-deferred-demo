@@ -1,5 +1,6 @@
 import { deferred } from "@remix-run/node";
-import type { LoaderFunction } from "@remix-run/node";
+import type { Deferrable, LoaderFunction } from "@remix-run/node";
+import type { ShouldReloadFunction } from "@remix-run/react";
 import {
   Deferred,
   Link,
@@ -10,10 +11,16 @@ import {
 
 import { getArticles } from "~/models/articles.server";
 
+export const unstable_shouldReload: ShouldReloadFunction = () => false;
+
+type LoaderData = {
+  popularArticles: Deferrable<ReturnType<typeof getArticles>>;
+};
+
 export const loader: LoaderFunction = () => {
   const popularArticles = getArticles(1000);
 
-  return deferred(
+  return deferred<LoaderData>(
     {
       popularArticles,
     },
@@ -22,7 +29,7 @@ export const loader: LoaderFunction = () => {
 };
 
 export default function BlogLayout() {
-  const { popularArticles } = useLoaderData();
+  const { popularArticles } = useLoaderData<LoaderData>();
 
   return (
     <div className="row">
@@ -30,7 +37,10 @@ export default function BlogLayout() {
         <Outlet />
       </main>
       <aside className="rightcolumn">
-        <Deferred data={popularArticles} fallback={<PopularArticlesFallback />}>
+        <Deferred
+          value={popularArticles}
+          fallback={<PopularArticlesFallback />}
+        >
           <PopularArticles />
         </Deferred>
 
@@ -66,7 +76,7 @@ function PopularArticlesFallback() {
 }
 
 function PopularArticles() {
-  let articles = useDeferred() as Awaited<ReturnType<typeof getArticles>>;
+  let articles = useDeferred<LoaderData["popularArticles"]>();
 
   return (
     <div className="card">

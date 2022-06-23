@@ -1,8 +1,16 @@
-import type { HeadersFunction, LoaderFunction } from "@remix-run/node";
+import type {
+  Deferrable,
+  HeadersFunction,
+  LoaderFunction,
+} from "@remix-run/node";
 import { deferred } from "@remix-run/node";
 import { Deferred, useDeferred, useLoaderData } from "@remix-run/react";
 
 import { getArticle } from "~/models/articles.server";
+
+type LoaderData = {
+  article: Deferrable<ReturnType<typeof getArticle>>;
+};
 
 export const loader: LoaderFunction = ({ params: { id } }) => {
   const article = getArticle(id!);
@@ -19,7 +27,7 @@ export default function BlogPost() {
   const { article } = useLoaderData();
 
   return (
-    <Deferred data={article} fallback={<ArticleFallback />}>
+    <Deferred value={article} fallback={<ArticleFallback />}>
       <Article />
     </Deferred>
   );
@@ -30,7 +38,7 @@ function ArticleFallback() {
 }
 
 function Article() {
-  const article = useDeferred() as Awaited<ReturnType<typeof getArticle>>;
+  const article = useDeferred<LoaderData["article"]>();
 
   return (
     <main>
