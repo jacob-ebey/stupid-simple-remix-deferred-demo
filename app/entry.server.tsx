@@ -27,6 +27,7 @@ export default function handleRequest(
           let body = new PassThrough();
 
           responseHeaders.set("Content-Type", "text/html");
+          responseHeaders.set("Content-Encoding", "chunked");
 
           resolve(
             new Response(body, {
