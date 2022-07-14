@@ -5,7 +5,7 @@ import {
   Deferred,
   Link,
   Outlet,
-  useDeferred,
+  useDeferredData,
   useLoaderData,
 } from "@remix-run/react";
 
@@ -39,7 +39,7 @@ export default function BlogLayout() {
       <aside className="rightcolumn">
         <Deferred
           value={popularArticles}
-          fallback={<PopularArticlesFallback />}
+          fallbackElement={<PopularArticlesFallback />}
         >
           <PopularArticles />
         </Deferred>
@@ -76,7 +76,7 @@ function PopularArticlesFallback() {
 }
 
 function PopularArticles() {
-  let articles = useDeferred<LoaderData["popularArticles"]>();
+  let articles = useDeferredData<LoaderData["popularArticles"]>();
 
   return (
     <div className="card">

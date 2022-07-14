@@ -1,36 +1,44 @@
-import type {
-  Deferrable,
-  HeadersFunction,
-  LoaderFunction,
-} from "@remix-run/node";
+import type { HeadersFunction } from "@remix-run/node";
 import { deferred } from "@remix-run/node";
-import { Deferred, Link, useDeferred, useLoaderData } from "@remix-run/react";
+import { Deferred, Link, useLoaderData } from "@remix-run/react";
 
 import { getArticles } from "~/models/articles.server";
 
-type LoaderData = {
-  articles: Deferrable<ReturnType<typeof getArticles>>;
-};
-
-export const loader: LoaderFunction = () => {
+export function loader() {
   const articles = getArticles(500);
 
-  return deferred<LoaderData>(
+  return deferred(
     {
       articles,
     },
     { headers: { "Cache-Control": "public, max-age=300" } }
   );
-};
+}
 
 export const headers: HeadersFunction = ({ loaderHeaders }) => loaderHeaders;
 
 export default function Index() {
-  const { articles } = useLoaderData<LoaderData>();
+  const { articles } = useLoaderData<typeof loader>();
 
   return (
-    <Deferred value={articles} fallback={<ArticlesFallback />}>
-      <Articles />
+    <Deferred value={articles} fallbackElement={<ArticlesFallback />}>
+      {(articles) =>
+        articles.map(({ id, description, title }) => (
+          <div key={id} className="card">
+            <h2>{title}</h2>
+            <h5>{description}</h5>
+            <img
+              className="fakeimg"
+              style={{ height: 200 }}
+              src="https://placekitten.com/g/1200/500"
+              alt="A cute cat picture in black and white"
+            />
+            <p>
+              <Link to={`/blog/${id}`}>Read Article</Link>
+            </p>
+          </div>
+        ))
+      }
     </Deferred>
   );
 }
@@ -43,29 +51,5 @@ function ArticlesFallback() {
       <div className="fakeimg" style={{ height: 200 }} />
       <p>&nbsp;</p>
     </div>
-  );
-}
-
-function Articles() {
-  const articles = useDeferred<LoaderData["articles"]>();
-
-  return (
-    <>
-      {articles.map(({ id, description, title }) => (
-        <div key={id} className="card">
-          <h2>{title}</h2>
-          <h5>{description}</h5>
-          <img
-            className="fakeimg"
-            style={{ height: 200 }}
-            src="https://placekitten.com/g/1200/500"
-            alt="A cute cat picture in black and white"
-          />
-          <p>
-            <Link to={`/blog/${id}`}>Read Article</Link>
-          </p>
-        </div>
-      ))}
-    </>
   );
 }
