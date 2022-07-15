@@ -26,7 +26,7 @@ export default function handleRequest(
         [callbackName]() {
           let body = new PassThrough();
 
-          responseHeaders.set("Content-Type", "text/html");
+          responseHeaders.set("Content-Type", "text/html; charset=UTF-8");
           responseHeaders.set("Content-Encoding", "chunked");
 
           resolve(
@@ -35,6 +35,7 @@ export default function handleRequest(
               headers: responseHeaders,
             })
           );
+          body.write("<!DOCTYPE html>");
           pipe(body);
         },
         onShellError(err) {
