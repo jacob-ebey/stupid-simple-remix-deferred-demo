@@ -23,7 +23,7 @@ export default async function handleRequest(
     }
   );
 
-  responseHeaders.set("Content-Type", "text/html");
+  responseHeaders.set("Content-Type", "text/html; charset=utf8");
   responseHeaders.set("Content-Encoding", "chunked");
   responseHeaders.set("Transfer-Encoding", "chunked");
 
