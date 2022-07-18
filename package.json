@@ -11,10 +11,10 @@
     "start": "node ./server.js"
   },
   "dependencies": {
-    "@remix-run/express": "0.0.0-experimental-2d985459e",
-    "@remix-run/node": "0.0.0-experimental-2d985459e",
-    "@remix-run/react": "0.0.0-experimental-2d985459e",
-    "@remix-run/serve": "0.0.0-experimental-2d985459e",
+    "@remix-run/express": "0.0.0-experimental-24bf73f51",
+    "@remix-run/node": "0.0.0-experimental-24bf73f51",
+    "@remix-run/react": "0.0.0-experimental-24bf73f51",
+    "@remix-run/serve": "0.0.0-experimental-24bf73f51",
     "cross-env": "^7.0.3",
     "express": "^4.18.1",
     "isbot": "^3.5.0",
@@ -22,7 +22,7 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@remix-run/dev": "0.0.0-experimental-2d985459e",
+    "@remix-run/dev": "0.0.0-experimental-24bf73f51",
     "@types/react": "^18.0.9",
     "@types/react-dom": "^18.0.4",
     "cross-env": "^7.0.3",

@@ -1,5 +1,5 @@
 import { deferred } from "@remix-run/node";
-import type { Deferrable, LoaderFunction } from "@remix-run/node";
+import type { LoaderFunction } from "@remix-run/node";
 import type { ShouldReloadFunction } from "@remix-run/react";
 import {
   Deferred,
@@ -14,10 +14,10 @@ import { getArticles } from "~/models/articles.server";
 export const unstable_shouldReload: ShouldReloadFunction = () => false;
 
 type LoaderData = {
-  popularArticles: Deferrable<ReturnType<typeof getArticles>>;
+  popularArticles: ReturnType<typeof getArticles>;
 };
 
-export const loader: LoaderFunction = () => {
+export function loader() {
   const popularArticles = getArticles(1000);
 
   return deferred<LoaderData>(
@@ -26,10 +26,10 @@ export const loader: LoaderFunction = () => {
     },
     { headers: { "Cache-Control": "public, max-age=300" } }
   );
-};
+}
 
 export default function BlogLayout() {
-  const { popularArticles } = useLoaderData<LoaderData>();
+  const { popularArticles } = useLoaderData<typeof loader>();
 
   return (
     <div className="row">
