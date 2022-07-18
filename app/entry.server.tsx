@@ -1,51 +1,36 @@
 import { PassThrough } from "stream";
-import { renderToPipeableStream } from "react-dom/server";
+// import { renderToPipeableStream } from "react-dom/server";
+import { renderToStream } from "react-streaming/server";
 import { RemixServer } from "@remix-run/react";
 import type { EntryContext } from "@remix-run/node";
 import { Response, Headers } from "@remix-run/node";
-import isbot from "isbot";
 
-const ABORT_DELAY = 5000;
-
-export default function handleRequest(
+export default async function handleRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
   remixContext: EntryContext
 ) {
-  const callbackName = isbot(request.headers.get("user-agent"))
-    ? "onAllReady"
-    : "onShellReady";
+  const { pipe } = await renderToStream(
+    <RemixServer context={remixContext} url={request.url} />,
+    {
+      seoStrategy: "google-speed",
+      userAgent: request.headers.get("User-Agent") || undefined,
+      onBoundaryError(error) {
+        responseStatusCode = 500;
+        console.error(error);
+      },
+    }
+  );
 
-  return new Promise((resolve, reject) => {
-    let didError = false;
+  responseHeaders.set("Content-Type", "text/html");
+  responseHeaders.set("Content-Encoding", "chunked");
+  responseHeaders.set("Transfer-Encoding", "chunked");
 
-    const { pipe, abort } = renderToPipeableStream(
-      <RemixServer context={remixContext} url={request.url} />,
-      {
-        [callbackName]() {
-          let body = new PassThrough();
-
-          responseHeaders.set("Content-Type", "text/html");
-          responseHeaders.set("Content-Encoding", "chunked");
-
-          resolve(
-            new Response(body, {
-              status: didError ? 500 : responseStatusCode,
-              headers: responseHeaders,
-            })
-          );
-          pipe(body);
-        },
-        onShellError(err) {
-          reject(err);
-        },
-        onError(error) {
-          didError = true;
-          console.error(error);
-        },
-      }
-    );
-    setTimeout(abort, ABORT_DELAY);
+  const body = new PassThrough();
+  pipe!(body);
+  return new Response(body, {
+    status: responseStatusCode,
+    headers: responseHeaders,
   });
 }
