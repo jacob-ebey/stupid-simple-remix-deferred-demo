@@ -1,5 +1,3 @@
-import { PassThrough } from "stream";
-// import { renderToPipeableStream } from "react-dom/server";
 import { renderToStream } from "react-streaming/server";
 import { RemixServer } from "@remix-run/react";
 import type { EntryContext } from "@remix-run/node";
@@ -11,7 +9,7 @@ export default async function handleRequest(
   responseHeaders: Headers,
   remixContext: EntryContext
 ) {
-  const { pipe } = await renderToStream(
+  const { pipe, readable } = await renderToStream(
     <RemixServer context={remixContext} url={request.url} />,
     {
       seoStrategy: "google-speed",
@@ -24,12 +22,16 @@ export default async function handleRequest(
   );
 
   responseHeaders.set("Content-Type", "text/html");
-  responseHeaders.set("Connection", "keep-alive");
   responseHeaders.set("Content-Encoding", "chunked");
-  responseHeaders.set("Transfer-Encoding", "chunked");
 
-  const body = new PassThrough();
-  pipe!(body);
+  let body: any = readable;
+
+  if (pipe) {
+    const { PassThrough } = await import("node:stream");
+    body = new PassThrough();
+    pipe(body);
+  }
+
   return new Response(body, {
     status: responseStatusCode,
     headers: responseHeaders,

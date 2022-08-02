@@ -1,6 +1,7 @@
+import { Suspense } from "react";
 import type { HeadersFunction, LoaderArgs } from "@remix-run/node";
-import { deferred } from "@remix-run/node";
-import { Deferred, useDeferredData, useLoaderData } from "@remix-run/react";
+import { defer } from "@remix-run/node";
+import { Await, useAsyncValue, useLoaderData } from "@remix-run/react";
 
 import { getArticle } from "~/models/articles.server";
 
@@ -11,7 +12,7 @@ type LoaderData = {
 export function loader({ params: { id } }: LoaderArgs) {
   const article = getArticle(id!);
 
-  return deferred<LoaderData>(
+  return defer<LoaderData>(
     { article },
     { headers: { "Cache-Control": "public, max-age=300" } }
   );
@@ -23,9 +24,11 @@ export default function BlogPost() {
   const { article } = useLoaderData<typeof loader>();
 
   return (
-    <Deferred value={article} fallbackElement={<ArticleFallback />}>
-      <Article />
-    </Deferred>
+    <Suspense fallback={<ArticleFallback />}>
+      <Await resolve={article}>
+        <Article />
+      </Await>
+    </Suspense>
   );
 }
 
@@ -34,7 +37,7 @@ function ArticleFallback() {
 }
 
 function Article() {
-  const article = useDeferredData<LoaderData["article"]>();
+  const article = useAsyncValue() as Awaited<LoaderData["article"]>;
 
   return (
     <main>

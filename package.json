@@ -11,10 +11,10 @@
     "start": "node ./server.js"
   },
   "dependencies": {
-    "@remix-run/express": "0.0.0-experimental-24bf73f51",
-    "@remix-run/node": "0.0.0-experimental-24bf73f51",
-    "@remix-run/react": "0.0.0-experimental-24bf73f51",
-    "@remix-run/serve": "0.0.0-experimental-24bf73f51",
+    "@remix-run/express": "0.0.0-experimental-ba234c1dc",
+    "@remix-run/node": "0.0.0-experimental-ba234c1dc",
+    "@remix-run/react": "0.0.0-experimental-ba234c1dc",
+    "@remix-run/serve": "0.0.0-experimental-ba234c1dc",
     "cross-env": "^7.0.3",
     "express": "^4.18.1",
     "nprogress": "^0.2.0",
@@ -23,7 +23,7 @@
     "react-streaming": "^0.2.15"
   },
   "devDependencies": {
-    "@remix-run/dev": "0.0.0-experimental-24bf73f51",
+    "@remix-run/dev": "0.0.0-experimental-ba234c1dc",
     "@types/nprogress": "^0.2.0",
     "@types/react": "^18.0.9",
     "@types/react-dom": "^18.0.4",

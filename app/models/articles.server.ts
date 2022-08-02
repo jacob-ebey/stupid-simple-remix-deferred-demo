@@ -21,10 +21,6 @@ type Article = {
   html: string;
 };
 
-declare global {
-  var lastArticles: ArticlePreview[];
-}
-
 export async function getArticle(
   id: string,
   delay: number = 500
@@ -46,10 +42,6 @@ export async function getArticles(
   delay: number = 500
 ): Promise<ArticlePreview[]> {
   await new Promise((resolve) => setTimeout(resolve, delay));
-
-  if (process.env.NODE_ENV === "development" && global.lastArticles) {
-    return global.lastArticles;
-  }
 
   let json: { files: GithubMdFile[] } = await fetch(
     "https://github-md.com/jacob-ebey/remix-blog-example-content/main"
@@ -73,10 +65,6 @@ export async function getArticles(
       id: files[index].path.split("/").pop()!.replace(/\.md$/, ""),
     };
   });
-
-  if (process.env.NODE_ENV === "development") {
-    lastArticles = articles;
-  }
 
   return articles;
 }

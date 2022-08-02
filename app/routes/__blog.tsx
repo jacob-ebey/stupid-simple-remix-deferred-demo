@@ -1,11 +1,11 @@
-import { deferred } from "@remix-run/node";
-import type { LoaderFunction } from "@remix-run/node";
+import { Suspense } from "react";
+import { defer } from "@remix-run/node";
 import type { ShouldReloadFunction } from "@remix-run/react";
 import {
-  Deferred,
+  Await,
   Link,
   Outlet,
-  useDeferredData,
+  useAsyncValue,
   useLoaderData,
 } from "@remix-run/react";
 
@@ -20,7 +20,7 @@ type LoaderData = {
 export function loader() {
   const popularArticles = getArticles(1000);
 
-  return deferred<LoaderData>(
+  return defer<LoaderData>(
     {
       popularArticles,
     },
@@ -37,12 +37,11 @@ export default function BlogLayout() {
         <Outlet />
       </main>
       <aside className="rightcolumn">
-        <Deferred
-          value={popularArticles}
-          fallbackElement={<PopularArticlesFallback />}
-        >
-          <PopularArticles />
-        </Deferred>
+        <Suspense fallback={<PopularArticlesFallback />}>
+          <Await resolve={popularArticles}>
+            <PopularArticles />
+          </Await>
+        </Suspense>
 
         <div className="card">
           <h2>About Me</h2>
@@ -76,7 +75,7 @@ function PopularArticlesFallback() {
 }
 
 function PopularArticles() {
-  let articles = useDeferredData<LoaderData["popularArticles"]>();
+  let articles = useAsyncValue() as Awaited<LoaderData["popularArticles"]>;
 
   return (
     <div className="card">
