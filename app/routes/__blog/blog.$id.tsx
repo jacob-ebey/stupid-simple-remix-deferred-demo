@@ -1,18 +1,15 @@
 import { Suspense } from "react";
 import type { HeadersFunction, LoaderArgs } from "@remix-run/node";
 import { defer } from "@remix-run/node";
+import type { UseDataFunctionReturn } from "@remix-run/react";
 import { Await, useAsyncValue, useLoaderData } from "@remix-run/react";
 
 import { getArticle } from "~/models/articles.server";
 
-type LoaderData = {
-  article: ReturnType<typeof getArticle>;
-};
-
 export function loader({ params: { id } }: LoaderArgs) {
   const article = getArticle(id!);
 
-  return defer<LoaderData>(
+  return defer(
     { article },
     { headers: { "Cache-Control": "public, max-age=300" } }
   );
@@ -37,7 +34,8 @@ function ArticleFallback() {
 }
 
 function Article() {
-  const article = useAsyncValue() as Awaited<LoaderData["article"]>;
+  const article =
+    useAsyncValue<UseDataFunctionReturn<typeof loader>["article"]>();
 
   return (
     <main>

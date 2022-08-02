@@ -1,6 +1,9 @@
 import { Suspense } from "react";
 import { defer } from "@remix-run/node";
-import type { ShouldReloadFunction } from "@remix-run/react";
+import type {
+  ShouldReloadFunction,
+  UseDataFunctionReturn,
+} from "@remix-run/react";
 import {
   Await,
   Link,
@@ -75,7 +78,8 @@ function PopularArticlesFallback() {
 }
 
 function PopularArticles() {
-  let articles = useAsyncValue() as Awaited<LoaderData["popularArticles"]>;
+  let articles =
+    useAsyncValue<UseDataFunctionReturn<typeof loader>["popularArticles"]>();
 
   return (
     <div className="card">
