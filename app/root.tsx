@@ -9,6 +9,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLocation,
   useTransition,
 } from "@remix-run/react";
 import type { LinksFunction, MetaFunction } from "@remix-run/node";
@@ -26,6 +27,7 @@ export const links: LinksFunction = () => [
 
 export default function App() {
   let transition = useTransition();
+  let location = useLocation();
 
   React.useEffect(() => {
     // and when it's something else it means it's either submitting a form or
@@ -55,10 +57,9 @@ export default function App() {
 
           <nav className="topnav">
             <Link to="/">Blog</Link>
-            <a href="#">Link</a>
-            <a href="#" style={{ float: "right" }}>
-              Link
-            </a>
+            <Link replace to={location}>
+              Reload Current Page
+            </Link>
           </nav>
         </header>
 
