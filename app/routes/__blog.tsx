@@ -23,12 +23,9 @@ type LoaderData = {
 export function loader() {
   const popularArticles = getArticles(1000);
 
-  return defer<LoaderData>(
-    {
-      popularArticles,
-    },
-    { headers: { "Cache-Control": "public, max-age=300" } }
-  );
+  return defer<LoaderData>({
+    popularArticles,
+  });
 }
 
 export default function BlogLayout() {
