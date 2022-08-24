@@ -22,7 +22,6 @@ export default async function handleRequest(
   );
 
   responseHeaders.set("Content-Type", "text/html");
-  responseHeaders.set("Content-Encoding", "chunked");
 
   let body: any = readable;
 

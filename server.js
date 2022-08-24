@@ -1,6 +1,7 @@
 const path = require("path");
 const express = require("express");
 const { createRequestHandler } = require("@remix-run/express");
+const compression = require("compression");
 
 if (process.env.NODE_ENV === "development") {
   require("inspector").open();
@@ -12,6 +13,8 @@ const app = express();
 
 // http://expressjs.com/en/advanced/best-practice-security.html#at-a-minimum-disable-x-powered-by-header
 app.disable("x-powered-by");
+
+app.use(compression());
 
 // Remix fingerprints its assets so we can cache forever.
 app.use(
