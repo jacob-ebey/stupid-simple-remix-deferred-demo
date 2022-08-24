@@ -1,38 +1,52 @@
-import { renderToStream } from "react-streaming/server";
-import { RemixServer } from "@remix-run/react";
+import { PassThrough } from "stream";
 import type { EntryContext } from "@remix-run/node";
-import { Response, Headers } from "@remix-run/node";
+import { Response } from "@remix-run/node";
+import { RemixServer } from "@remix-run/react";
+import { renderToPipeableStream } from "react-dom/server";
 
-export default async function handleRequest(
+const ABORT_DELAY = 5000;
+
+export default function handleRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
   remixContext: EntryContext
 ) {
-  const { pipe, readable } = await renderToStream(
-    <RemixServer context={remixContext} url={request.url} />,
-    {
-      seoStrategy: "google-speed",
-      userAgent: request.headers.get("User-Agent") || undefined,
-      onBoundaryError(error) {
-        responseStatusCode = 500;
-        console.error(error);
-      },
-    }
-  );
+  return new Promise((resolve, reject) => {
+    let didError = false;
 
-  responseHeaders.set("Content-Type", "text/html");
+    const { pipe, abort } = renderToPipeableStream(
+      <RemixServer
+        context={remixContext}
+        url={request.url}
+        serverAbortDelay={ABORT_DELAY}
+      />,
+      {
+        onShellReady: () => {
+          const body = new PassThrough();
 
-  let body: any = readable;
+          responseHeaders.set("Content-Type", "text/html");
 
-  if (pipe) {
-    const { PassThrough } = await import("node:stream");
-    body = new PassThrough();
-    pipe(body);
-  }
+          resolve(
+            new Response(body, {
+              headers: responseHeaders,
+              status: didError ? 500 : responseStatusCode,
+            })
+          );
 
-  return new Response(body, {
-    status: responseStatusCode,
-    headers: responseHeaders,
+          pipe(body);
+        },
+        onShellError: (err) => {
+          reject(err);
+        },
+        onError: (error) => {
+          didError = true;
+
+          console.error(error);
+        },
+      }
+    );
+
+    setTimeout(abort, ABORT_DELAY);
   });
 }
